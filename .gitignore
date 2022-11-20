@@ -1,0 +1,11 @@
+.direnv
+
+# Ansible
+.vault
+group_vars/*/vault*
+
+# Terraform
+.terraform
+terraform.tfstate*
+terraform.tfvars
+.auto.tfvars

@@ -1,0 +1,115 @@
+---
+
+- name: Create root dir
+  file:
+    path: "{{ root }}"
+    state: directory
+
+### BACKUPS
+- name: Backups
+  tags: backup
+  block:
+    - name: Backup directory
+      file:
+        path: "{{ root }}/backup"
+        state: directory
+        mode: '700'
+    - name: Kopia directories
+      file:
+        path: "{{ root }}/kopia/{{ item }}"
+        state: directory
+        mode: '700'
+      with_items:
+        - 'cache'
+        - 'config'
+        - 'logs'
+        - 'rclone'
+    - name: Rclone conf
+      template:
+        src: "rclone.conf"
+        dest: "{{ root }}/kopia/rclone/rclone.conf"
+        mode: '600'
+    - name: Kopia repo conf
+      template:
+        src: "kopia-repository.config"
+        dest: "{{ root }}/kopia/config/repository.config"
+        mode: '600'
+    - name: Backup script
+      template:
+        src: backup.sh
+        dest: "{{ root }}/backup.sh"
+        mode: '700'
+    - name: Cron backup
+      cron:
+        name: Mastodon backup
+        job: 'cron-runner {{ root }}/backup.sh'
+        hour: 5
+        minute: 30
+
+### CADDY
+- name: Caddy
+  tags: caddy
+  block:
+    - name: Caddy top directory
+      file:
+        path: "{{ root }}/caddy"
+        state: directory
+    - name: Caddy config directory
+      file:
+        path: "{{ root }}/caddy/config"
+        state: directory
+    - name: Caddy data directory
+      file:
+        path: "{{ root }}/caddy/data"
+        state: directory
+    - name: Caddyfile
+      template:
+        src: Caddyfile
+        dest: "{{ root }}/caddy/Caddyfile"
+    - name: Caddy Dockerfile with Cloudflare DNS
+      template:
+        src: CaddyDockerfile
+        dest: "{{ root }}/caddy/Dockerfile"
+
+### POSTGRES
+- name: Postgres directory
+  tags: postgres
+  file:
+    path: "{{ root }}/postgres"
+    state: directory
+
+### REDIS
+- name: Redis directory
+  tags: redis
+  file:
+    path: "{{ root }}/redis"
+    state: directory
+
+### MASTODON
+- name: Mastodon
+  tags: mastodon
+  block:
+    - name: Mastodon GitHub repo directory
+      git:
+        repo: "https://github.com/mastodon/mastodon.git"
+        dest: "{{ root }}/mastodon"
+        version: "{{ mastodon_version }}"
+    - name: Mastodon files directory
+      file:
+        path: "{{ root }}/files"
+        state: directory
+        mode: '777'  # Runs under its own docker user and group which ansible doesn't know about
+    - name: Mastodon config file
+      template:
+        src: "env.production"
+        dest: "{{ root }}/.env.production"
+
+    ### DOCKER COMPOSE
+    - name: Place docker-compose.yaml
+      ansible.builtin.template:
+        src: docker-compose.yaml
+        dest: "{{ root }}/docker-compose.yaml"
+
+    - name: Start the mastodon stack
+      community.docker.docker_compose:
+        project_src: "{{ root }}"

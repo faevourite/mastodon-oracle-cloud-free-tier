@@ -1,0 +1,77 @@
+---
+
+# After setting up the infrastructure with Terraform or manually, run
+#
+# `ansible-playbook mastodon.yaml --tags bootstrap`
+#
+# to format and mount the block storage partition. This is a one-time
+# operation, but can be re-run safely. After that, run
+#
+# `ansible-playbook mastodon.yaml`
+#
+# To provision and configure the rest of the stack
+
+- name: Mastodon
+  hosts: mastodon
+  pre_tasks:
+    - name: One-time filesystem setup
+      tags: [ 'never', 'bootstrap' ]
+      become: true
+      block:
+        # OCI uses a special volume name (set in terraform resource); otherwise, it changes per boot
+        # https://docs.oracle.com/en-us/iaas/Content/Block/Tasks/connectingtoavolume.htm
+        # https://docs.oracle.com/en-us/iaas/Content/Block/References/fstaboptionsconsistentdevicepaths.htm#fstab_Options_for_Block_Volumes_Using_Consistent_Device_Paths
+        - name: Ensure filesystem exists on attached volume (/dev/oracleoci/oraclevdb)
+          filesystem:
+            fstype: ext4
+            dev: /dev/oracleoci/oraclevdb
+        - name: "Mount attached volume (/dev/oracleoci/oraclevdb) to {{ root }}"
+          mount:
+            src: /dev/oracleoci/oraclevdb
+            path: "{{ root }}"
+            fstype: ext4
+            # _netdev delays mounting until block storage is ready.
+            # nofail means if block storage can't be mounted your system can still boot.
+            # If already unbootable, use the Web Cloud Console to open a serial terminal,
+            # Remove the volume mapping in /etc/fstab and reboot.
+            opts: defaults,noatime,_netdev,nofail
+            state: mounted
+        - name: "Set ownership/perms on {{ root }}"
+          file:
+            path: "{{ root }}"
+            state: directory
+            owner: ubuntu
+            mode: '700'
+        - name: Touch .ansible-check to mark success
+          copy:
+            content: ''
+            dest: "{{ root }}/.ansible-check"
+            force: no
+            owner: ubuntu
+            mode: '600'
+
+    - name: Ensure Mastodon directory is ready
+      tags: [ 'setup' ]
+      block:
+        - name: "Check if {{ root }} is set up"
+          stat:
+            path: "{{ root }}/.ansible-check"
+          register: data
+        - name: "Fail if {{ root }} isn't set up"
+          fail:
+            msg: "{{ root }}/.ansible-check doesn't exist. Re-run with '--tags bootstrap'"
+          when: 'not data.stat.exists or not data.stat.isreg'
+
+  roles:
+    - role: common-noroot
+      tags: setup
+    - role: common-root
+      tags: setup
+      vars:
+        # Seems to differ by Ubuntu version. This works for 22.04 LTS
+        sshguard_backend: /usr/libexec/sshguard/sshg-fw-nft-sets
+    - role: docker
+      tags: docker
+    - role: newrelic
+      tags: newrelic
+    - role: mastodon

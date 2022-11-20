@@ -1,0 +1,126 @@
+version: '3'
+
+x-logging: &default-logging
+  options:
+    max-size: "50m"
+    max-file: "5"
+    mode: "non-blocking"
+  driver: local
+
+services:
+  caddy:
+    restart: always
+    build: ./caddy
+    image: "caddy:{{ caddy_version }}"
+    networks:
+      - external_network
+    ports:
+      - "443:443"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile
+      - ./caddy/config:/config
+      - ./caddy/data:/data
+      - ./mastodon/public:/html/mastodon
+    logging: *default-logging
+
+  db:
+    restart: always
+    image: postgres:14-alpine
+    shm_size: 512mb
+    networks:
+      - internal_network
+    healthcheck:
+      test: [ 'CMD', 'pg_isready', '-U', 'postgres' ]
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
+    environment:
+      - 'POSTGRES_HOST_AUTH_METHOD=trust'
+    logging: *default-logging
+
+  redis:
+    restart: always
+    image: redis:7-alpine
+    networks:
+      - internal_network
+    healthcheck:
+      test: [ 'CMD', 'redis-cli', 'ping' ]
+    volumes:
+      - ./redis:/data
+    logging: *default-logging
+
+  # One-time setup. Uncomment and run `docker-compose run -e RAILS_ENV=production setup bundle exec rake mastodon:setup`
+  # See https://docs.joinmastodon.org/admin/install/
+  # Can probably also just run web and then `docker-compose exec` into it to run the setup step
+  #  setup:
+  #    build: ./mastodon
+  #    image: tootsuite/mastodon
+  #    command: "bundle exec rake mastodon:setup"
+  #    environment:
+  #      RAILS_ENV: production
+  #    networks:
+  #      - internal_network
+  #      - external_network
+  #    depends_on:
+  #      - db
+  #      - redis
+  #    volumes:
+  #      - ./files:/mastodon/public/system
+
+  web:
+    build: ./mastodon
+    image: "tootsuite/mastodon:{{ mastodon_version }}"
+    restart: always
+    env_file: .env.production
+    command: bash -c "rm -f /mastodon/tmp/pids/server.pid; bundle exec rails s -p 3000"
+    networks:
+      - external_network
+      - internal_network
+    healthcheck:
+      # prettier-ignore
+      test: [ 'CMD-SHELL', 'wget -q --spider --proxy=off localhost:3000/health || exit 1' ]
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./files:/mastodon/public/system
+    logging: *default-logging
+
+  streaming:
+    build: ./mastodon
+    image: "tootsuite/mastodon:{{ mastodon_version }}"
+    restart: always
+    env_file: .env.production
+    command: node ./streaming
+    networks:
+      - external_network
+      - internal_network
+    healthcheck:
+      # prettier-ignore
+      test: [ 'CMD-SHELL', 'wget -q --spider --proxy=off localhost:4000/api/v1/streaming/health || exit 1' ]
+    depends_on:
+      - db
+      - redis
+    logging: *default-logging
+
+  sidekiq:
+    build: ./mastodon
+    image: "tootsuite/mastodon:{{ mastodon_version }}"
+    restart: always
+    env_file: .env.production
+    command: bundle exec sidekiq
+    depends_on:
+      - db
+      - redis
+    networks:
+      - external_network
+      - internal_network
+    volumes:
+      - ./files:/mastodon/public/system
+    healthcheck:
+      test: [ 'CMD-SHELL', "ps aux | grep '[s]idekiq\ 6' || false" ]
+    logging: *default-logging
+
+networks:
+  external_network:
+  internal_network:
+    internal: true

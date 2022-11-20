@@ -1,0 +1,69 @@
+---
+### VERSIONS
+mastodon_version: v4.0.2
+caddy_version: 2.6-alpine
+caddy_builder_version: 2.6-builder-alpine
+kopia_version: 0.12.1
+
+
+### MASTODON
+# All data goes here, including DB, file storage, backups, etc.
+# Block storage is attached to this mountpoint.
+root: /mnt/mastodon
+
+### https://docs.joinmastodon.org/admin/config/
+# Your handle will be <name>@<local_domain>
+local_domain: glyphy.com
+
+# Instance "name" (what you enter in clients) and how you access the Web UI
+web_domain: social.glyphy.com
+
+single_user_mode: "true"
+
+smtp_server: smtp.sendgrid.net
+smtp_port: 587
+smtp_login: apikey
+smtp_auth_method: plain
+smtp_openssl_verify_mode: none
+smtp_enable_starttls: auto
+smtp_from_address: "Mastodon <dv+masto@glyphy.com>"
+
+### SECRETS
+# Set up Ansible Vault if you haven't yet:
+# https://docs.ansible.com/ansible/latest/user_guide/vault.html
+#
+# Add all the `vault_*` variables below to vault.yaml
+# and then run `ansible-vault encrypt vault.yaml`
+
+# Caddy Cloudflare DNS plugin to set up a TLS cert
+# https://github.com/caddy-dns/cloudflare#authenticating
+cloudflare_token: "{{ vault_cloudflare_token }}"
+
+# Mastodon secrets
+# See README.md . These are generated via tootctl once Mastodon is running.
+otp_secret: "{{ vault_otp_secret }}"
+secret_key_base: "{{ vault_secret_key_base }}"
+vapid_priv_key: "{{ vault_vapid_priv_key }}"
+vapid_pub_key: "{{ vault_vapid_pub_key }}"
+
+# Mastodon SMTP password
+# Depends on your email provider. See other smtp_ variables above too.
+smtp_password: "{{ vault_smtp_password }}"
+
+# Kopia repository password (backups)
+# https://kopia.io/docs/getting-started/
+# Can leave empty if using your own backup strategy
+kopia_password: "{{ vault_kopia_password }}"
+
+# Pushover.net notifications (cron job failures)
+# Can leave empty
+pushover_key: "{{ vault_pushover_key }}"
+pushover_user: "{{ vault_pushover_user }}"
+
+# Healthchecks.io pings (cron job failures)
+# Can leave empty
+health_checks_io_url: "{{ vault_health_checks_io_url }}"
+
+# Newrelic license key
+# Can leave empty
+newrelic_license_key: "{{ vault_newrelic_license_key }}"

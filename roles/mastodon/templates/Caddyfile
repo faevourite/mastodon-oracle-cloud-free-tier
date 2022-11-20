@@ -1,0 +1,31 @@
+(cloudflare) {
+  tls {
+    dns cloudflare {{ cloudflare_token }}
+  }
+}
+
+{{ web_domain }} {
+  import cloudflare
+
+  @cache_control {
+    path_regexp ^/(emoji|packs|/system/accounts/avatars|/system/media_attachments/files)
+  }
+
+  encode zstd gzip
+
+  root * /html/mastodon
+  file_server
+
+  handle_errors {
+    rewrite 500.html
+    file_server
+  }
+
+  header Strict-Transport-Security "max-age=31536000"
+  header /sw.js Cache-Control "public, max-age=0"
+  header @cache_control Cache-Control "public, max-age=31536000, immutable"
+
+  reverse_proxy web:3000
+
+  reverse_proxy /api/v1/streaming/* streaming:4000
+}
