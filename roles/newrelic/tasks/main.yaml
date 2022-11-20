@@ -1,0 +1,10 @@
+---
+- name: Setup newrelic # https://github.com/newrelic/infrastructure-agent-ansible
+  become: true
+  import_role:
+    name: newrelic.newrelic-infra
+  vars:
+    nrinfragent_config:
+      license_key: "{{ newrelic_license_key }}"
+      log_file: /var/log/nr-infra.log
+      log_to_stdout: false
