@@ -1,0 +1,31 @@
+---
+- name: Setup ~/bin
+  ansible.builtin.file:
+    path: ~/bin
+    state: directory
+
+- name: Add ~/bin to PATH
+  ansible.builtin.lineinfile:
+    line: 'export PATH="/home/{{ ansible_user_id }}/bin:$PATH"'
+    path: ~/.bashrc
+
+- name: Add cronic
+  ansible.builtin.copy:
+    src: cronic
+    dest: ~/bin/cronic
+    mode: '0700'
+- name: Add cron-runner
+  ansible.builtin.template:
+    src: cron-runner
+    dest: ~/bin/cron-runner
+    mode: '0700'
+- name: Cron SHELL
+  ansible.builtin.cron:
+    name: SHELL
+    value: /bin/bash
+    env: yes
+- name: Cron PATH
+  ansible.builtin.cron:
+    name: PATH
+    value: "/home/ubuntu/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
+    env: yes

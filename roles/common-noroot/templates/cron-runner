@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+PUSHOVER_KEY='{{ pushover_key }}'
+PUSHOVER_USER='{{ pushover_user }}'
+
+out=$(cronic $@)
+if [ -n "$out" ]; then
+  if [[ -n "${PUSHOVER_KEY}" ]]; then
+    echo "$out" | curl -XPOST -s -d "token=$PUSHOVER_KEY" -d "user=$PUSHOVER_USER" \
+      -d "title=Cron failure on $(hostname)" -d monospace=1 -d priority=-1 \
+      --data-urlencode message@- \
+      'https://api.pushover.net/1/messages.json'
+  else
+    echo "$out"
+  fi
+fi
