@@ -1,0 +1,11 @@
+# comment line (a '#' as very first character)
+#   a single IPv4 and IPv6 address
+#   address blocks in CIDR notation
+#   hostnames
+
+{% for entry in sshguard_whitelist %}
+{% if entry.comment is defined %}
+#   {{ entry.comment }}
+{% endif %}
+{{ entry.address }}
+{% endfor %}

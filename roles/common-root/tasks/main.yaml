@@ -1,0 +1,44 @@
+---
+- name: Upgrade all packages
+  become: yes
+  apt:
+    upgrade: true
+    update_cache: true
+    cache_valid_time: 86400 # one day
+- name: Install packages
+  become: yes
+  apt:
+    name:
+      - curl
+      - wget
+      - unzip
+      - jq
+      - sshguard
+      - sysstat         # iostat, sar, etc.
+      - net-tools       # ifconfig, netstat, route, etc.
+      - ncdu            # for analyzing disk usage
+    state: latest
+
+# sshguard stuff is based off https://github.com/nephosolutions/ansible-role-sshguard
+- name: Start sshguard service
+  become: yes
+  service:
+    name: sshguard
+    state: started
+
+- name: Configure sshguard and its allowlist
+  become: yes
+  ansible.builtin.template:
+    src: "sshguard/{{ item }}.j2"
+    dest: "{{ sshguard_config_path }}/{{ item }}"
+    owner: root
+    group: root
+    mode: '0644'
+  with_items: "{{ sshguard_config_items }}"
+  notify: restart sshguard service
+
+- name: Limit systemd journal logs
+  become: yes
+  ansible.builtin.lineinfile:
+    path: "/etc/systemd/journald.conf"
+    line: "SystemMaxUse=1G"
