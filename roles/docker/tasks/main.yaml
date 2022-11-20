@@ -1,0 +1,34 @@
+---
+- name: Install docker
+  become: yes
+  apt:
+    name:
+    - docker.io
+    - docker-compose
+
+- name: Configure the docker service to start after tailscale
+  become: yes
+  ansible.builtin.lineinfile:
+    path: /lib/systemd/system/docker.service
+    insertafter: "^After="
+    line: 'After=tailscaled.service'
+
+- name: Put user in docker group
+  become: yes
+  ansible.builtin.user:
+    user: "{{ansible_user_id}}"
+    append: yes
+    groups: docker
+
+- name: Docker service
+  become: yes
+  ansible.builtin.service:
+    name: docker
+    state: started
+
+- name: Cron docker prune
+  ansible.builtin.cron:
+    name: "docker prune"
+    job: 'cron-runner docker system prune -af'
+    hour: "0"
+    minute: "10"
