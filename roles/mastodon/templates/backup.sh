@@ -27,7 +27,8 @@ ionice -c idle nice docker run --rm -e KOPIA_PASSWORD="{{ kopia_password }}" -e 
   -v "$(pwd)"/logs:/app/logs \
   -v "{{ root }}":/backup-src \
   "kopia/kopia:{{ kopia_version }}" \
-  snapshot create --log-level=warning --no-progress /backup-src/backup /backup-src/files #2>&1 # re-enable stderr redirect if kopia gets loud
+  snapshot create --log-level=warning --no-progress \
+  /backup-src/backup /backup-src/files 2>&1 # docker pulls print to stderr causing cronic to think it's failing
 
 echo "Done Kopia backup"
 
