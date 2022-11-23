@@ -17,6 +17,7 @@
       - sysstat         # iostat, sar, etc.
       - net-tools       # ifconfig, netstat, route, etc.
       - ncdu            # for analyzing disk usage
+      - dtach           # lighter "screen"
     state: latest
 
 # sshguard stuff is based off https://github.com/nephosolutions/ansible-role-sshguard
