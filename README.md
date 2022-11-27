@@ -4,6 +4,8 @@ Based loosely on https://github.com/xmflsct/oracle-arm-mastodon and https://gith
 
 This is how I set up my [@dv@glyphy.com account](https://social.glyphy.com/@dv).
 
+[Here's an alternate Ansible playbook](https://github.com/l3ib/mastodon-ansible) that doesn't use Docker. 
+
 ## Step 1: Prerequisites
 
 1. Create an [Oracle Cloud](https://www.oracle.com/cloud/) account. You just need the free tier.
