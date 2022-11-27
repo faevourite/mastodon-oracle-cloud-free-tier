@@ -4,7 +4,7 @@ Based loosely on https://github.com/xmflsct/oracle-arm-mastodon and https://gith
 
 This is how I set up my [@dv@glyphy.com account](https://social.glyphy.com/@dv).
 
-[Here's an alternate Ansible playbook](https://github.com/l3ib/mastodon-ansible) that doesn't use Docker. 
+[Here's an alternate Ansible playbook](https://github.com/l3ib/mastodon-ansible) that doesn't use Docker.
 
 ## Step 1: Prerequisites
 
@@ -44,6 +44,19 @@ You can skip this to get Mastodon running and set it up later. It won't impact h
 1. After setting up the repo and connecting to it, copy the generated `repository.config`
    into `roles/mastodon/templates/kopia-repository.config`.
 2. If you're using rclone, also copy the `rclone.conf` file to the same directory.
+3. I would recommend running `kopia repository connect` from your own machine (install it there if needed), enabling compression to save
+   space, and disabling a bunch of not-very-compressible extensions (case-sensitive, unfortunately):
+    ```bash
+   # If, like me, you used rclone, replace <rclone-repo-name> with the name from rclone.conf
+   # Adjust the rclone-args path as needed, or remove if you didn't need rclone
+   kopia repository connect rclone --remote-path=<rclone-repo-name>:/kopia --rclone-args="--config=roles/mastodon/templates/rclone.conf"
+   
+   # Enable compression
+   kopia policy set global --compression pgzip
+   
+   # Disable compression for common media files
+   kopia policy set --global --add-never-compress=.jpg --add-never-compress=.jpeg --add-never-compress=.JPG --add-never-compress=.JPEG --add-never-compress=.png --add-never-compress=.PNG --add-never-compress=.mov --add-never-compress=.MOV --add-never-compress=.mp4 --add-never-compress=.MP4 --add-never-compress=.avi --add-never-compress=.AVIer-compress=.JPEG --add-never-compress=.png --add-never-compress=.PNG --add-never-compress=.mov --add-never-compress=.MOV --add-never-compress=.mp4 --add-never-compress=.MP4 --add-never-compress=.avi --add-never-compress=.AVIer-compress=.JPEG --add-never-compress=.png --add-never-compress=.PNG --add-never-compress=.mov --add-never-compress=.MOV --add-never-compress=.mp4 --add-never-compress=.MP4 --add-never-compress=.avi --add-never-compress=.AVIer-compress=.JPEG --add-never-compress=.png --add-never-compress=.PNG --add-never-compress=.mov --add-never-compress=.MOV --add-never-compress=.mp4 --add-never-compress=.MP4 --add-never-compress=.avi --add-never-compress=.AVI
+   ```
 
 ### [Optional] Step 1.3: Observability with [Newrelic](https://newrelic.com/)
 
@@ -73,7 +86,8 @@ https://one.newrelic.com/ . Then you can set up alerts there to be notified if y
 
 1. Update `inventory.ini` and set the IP for the "oci" host to the one from the previous step.
 2. Configure Ansible variables in `group_vars/mastodon/vars.yaml`.
-3. If your `web_domain` is not the same as `local_domain`, you'll need to [set up a webfinger forward](https://docs.joinmastodon.org/admin/config/#web_domain) on the latter to point to the former.
+3. If your `web_domain` is not the same as `local_domain`, you'll need
+   to [set up a webfinger forward](https://docs.joinmastodon.org/admin/config/#web_domain) on the latter to point to the former.
     * I use an Apache-compatible web server on glyphy.com, so I added the following to my .htaccess:
         ```
         # Mastodon
