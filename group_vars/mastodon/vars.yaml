@@ -12,7 +12,7 @@ kopia_version: 0.12.1
 root: /mnt/mastodon
 
 ### https://docs.joinmastodon.org/admin/config/
-# Your handle will be <name>@<local_domain>
+# Your handle will be @<name>@<local_domain>
 local_domain: glyphy.com
 
 # Instance "name" (what you enter in clients) and how you access the Web UI

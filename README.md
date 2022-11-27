@@ -64,25 +64,33 @@ https://one.newrelic.com/ . Then you can set up alerts there to be notified if y
 2. From the `terraform` directory run `terraform init`.
 3. Then run `terraform apply`. Fix any errors, then review the plan and enter "yes" to provision the infra.
 4. Note the IP address at the end of the process. You should be able to `ssh ubuntu@<ip>` to log into your compute instance.
-5. Add an "A" record in your DNS provider to point at this IP for your Mastodon (sub)domain. This is the `web_domain` in Ansible vars 
+5. Add an "A" record in your DNS provider to point at this IP for your Mastodon (sub)domain. This is the `web_domain` in Ansible vars
    below. If you're using Cloudflare you can enable its proxying capability. It doesn't seem to interfere with ActivityPub traffic.
 
 ## Step 3: Set up Mastodon
 
 1. Update `inventory.ini` and set the IP for the "oci" host to the one from the previous step.
 2. Configure Ansible variables in `group_vars/mastodon/vars.yaml`.
-3. Configure Ansible secrets in `group_vars/mastodon/vault.yaml`.
+3. If your `web_domain` is not the same as `local_domain`, you'll need to [set up a webfinger forward](https://docs.joinmastodon.org/admin/config/#web_domain) on the latter to point to the former.
+    * I use an Apache-compatible web server on glyphy.com, so I added the following to my .htaccess:
+        ```
+        # Mastodon
+        RewriteRule ^.well-known/host-meta(.*)$ https://social.glyphy.com/.well-known/host-meta$1 [L,R=301]
+        RewriteRule ^.well-known/webfinger(.*)$ https://social.glyphy.com/.well-known/webfinger$1 [L,R=301]
+        ```
+4. If you don't want to leave secrets in plain-text, configure them in `group_vars/mastodon/vault.yaml`. Otherwise, just update the
+   `vault_` references in `vars.yaml`.
     * You'll need to set up [Ansible Vault](https://docs.ansible.com/ansible/latest/user_guide/vault.html) for this.
     * Note that Mastodon-specific vars like `otp_secret` are not known until later, so leave those empty for now.
-4. Create a filesystem for the attached block volume by running `ansible-playbook mastodon.yaml --tags bootstrap`. This will wipe
+5. Create a filesystem for the attached block volume by running `ansible-playbook mastodon.yaml --tags bootstrap`. This will wipe
    everything on it. If you're attaching a formatted disk, don't run this. Instead, just create an empty file called `.ansible-check` in
    the `root` variable location from `vars.yaml` above. This bootstrap process only needs to be done once.
-5. Run the full playbook to set up the rest of the stack: `ansible-playbook mastodon.yaml`
+6. Run the full playbook to set up the rest of the stack: `ansible-playbook mastodon.yaml`
     * You can add `-C` for a dry run to see what would happen without actually making any changes.
     * You can rerun this later if you make any config changes.
     * If you don't want to use the Kopia backups or want to set them up later, add `--skip-tags backup`
     * If you don't want to install the Newrelic agent, add `--skip-tags newrelic`
-6. Run the [one-time Mastodon bootstrapping setup](https://docs.joinmastodon.org/admin/setup/)
+7. Run the [one-time Mastodon bootstrapping setup](https://docs.joinmastodon.org/admin/setup/)
     * From the root directory (/mnt/mastodon by default): `docker-compose run -e RAILS_ENV=production setup bundle exec rake
       mastodon:setup`. This should output some environment variables. You'll find the missing secrets here. Copy their values into
       `group_vars/mastodon/vault.yaml` (use `ansible-vault edit vault.yaml` to edit and re-encrypt).
