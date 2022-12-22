@@ -111,7 +111,7 @@ https://one.newrelic.com/ . Then you can set up alerts there to be notified if y
 6. (Optional) Apply any upstream patches to modify Mastodon itself
    1. Clone [the mastodon repo](https://github.com/mastodon/mastodon)
    2. Make changes to the source code as needed. For example, [extend the default timeline length](https://github.com/mastodon/mastodon/issues/2301).
-   3. Run `git diff` and save the output to `roles/mastodon/files/mastodon.patch`. Example patch:
+   3. Run `git diff` and save the output to `roles/mastodon/files/mastodon.patch`. This will get applied in the next step. Example patch:
       ```
       diff --git a/app/lib/feed_manager.rb b/app/lib/feed_manager.rb
       index 510667558..96b05edf8 100644
