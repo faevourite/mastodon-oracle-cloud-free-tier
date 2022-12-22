@@ -55,7 +55,14 @@ You can skip this to get Mastodon running and set it up later. It won't impact h
    kopia policy set global --compression pgzip
    
    # Disable compression for common media files
-   kopia policy set --global --add-never-compress=.jpg --add-never-compress=.jpeg --add-never-compress=.JPG --add-never-compress=.JPEG --add-never-compress=.png --add-never-compress=.PNG --add-never-compress=.mov --add-never-compress=.MOV --add-never-compress=.mp4 --add-never-compress=.MP4 --add-never-compress=.avi --add-never-compress=.AVIer-compress=.JPEG --add-never-compress=.png --add-never-compress=.PNG --add-never-compress=.mov --add-never-compress=.MOV --add-never-compress=.mp4 --add-never-compress=.MP4 --add-never-compress=.avi --add-never-compress=.AVIer-compress=.JPEG --add-never-compress=.png --add-never-compress=.PNG --add-never-compress=.mov --add-never-compress=.MOV --add-never-compress=.mp4 --add-never-compress=.MP4 --add-never-compress=.avi --add-never-compress=.AVIer-compress=.JPEG --add-never-compress=.png --add-never-compress=.PNG --add-never-compress=.mov --add-never-compress=.MOV --add-never-compress=.mp4 --add-never-compress=.MP4 --add-never-compress=.avi --add-never-compress=.AVI
+   kopia policy set --global --add-never-compress=.jpg --add-never-compress=.jpeg --add-never-compress=.JPG --add-never-compress=.JPEG 
+   --add-never-compress=.png --add-never-compress=.PNG --add-never-compress=.mov --add-never-compress=.MOV --add-never-compress=.mp4 
+   --add-never-compress=.MP4 --add-never-compress=.avi --add-never-compress=.AVI --add-never-compress=.JPEG --add-never-compress=.png 
+   --add-never-compress=.PNG --add-never-compress=.mov --add-never-compress=.MOV --add-never-compress=.mp4 --add-never-compress=.MP4 
+   --add-never-compress=.avi --add-never-compress=.AVI --add-never-compress=.JPEG --add-never-compress=.png --add-never-compress=.PNG 
+   --add-never-compress=.mov --add-never-compress=.MOV --add-never-compress=.mp4 --add-never-compress=.MP4 --add-never-compress=.avi 
+   --add-never-compress=.AVI --add-never-compress=.JPEG --add-never-compress=.png --add-never-compress=.PNG --add-never-compress=.mov 
+   --add-never-compress=.MOV --add-never-compress=.mp4 --add-never-compress=.MP4 --add-never-compress=.avi --add-never-compress=.AVI
    ```
 
 ### [Optional] Step 1.3: Observability with [Newrelic](https://newrelic.com/)
