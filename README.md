@@ -108,12 +108,37 @@ https://one.newrelic.com/ . Then you can set up alerts there to be notified if y
 5. Create a filesystem for the attached block volume by running `ansible-playbook mastodon.yaml --tags bootstrap`. This will wipe
    everything on it. If you're attaching a formatted disk, don't run this. Instead, just create an empty file called `.ansible-check` in
    the `root` variable location from `vars.yaml` above. This bootstrap process only needs to be done once.
-6. Run the full playbook to set up the rest of the stack: `ansible-playbook mastodon.yaml`
+6. (Optional) Apply any upstream patches to modify Mastodon itself
+   1. Clone [the mastodon repo](https://github.com/mastodon/mastodon)
+   2. Make changes to the source code as needed. For example, [extend the default timeline length](https://github.com/mastodon/mastodon/issues/2301).
+   3. Run `git diff` and save the output to `roles/mastodon/files/mastodon.patch`. Example patch:
+      ```
+      diff --git a/app/lib/feed_manager.rb b/app/lib/feed_manager.rb
+      index 510667558..96b05edf8 100644
+      --- a/app/lib/feed_manager.rb
+      +++ b/app/lib/feed_manager.rb
+      @@ -7,12 +7,12 @@ class FeedManager
+         include Redisable
+       
+         # Maximum number of items stored in a single feed
+      -  MAX_ITEMS = 400
+      +  MAX_ITEMS = 4000
+       
+         # Number of items in the feed since last reblog of status
+         # before the new reblog will be inserted. Must be <= MAX_ITEMS
+         # or the tracking sets will grow forever
+      -  REBLOG_FALLOFF = 40
+      +  REBLOG_FALLOFF = 400
+       
+         # Execute block for every active account
+         # @yield [Account]
+      ```
+7. Run the full playbook to set up the rest of the stack: `ansible-playbook mastodon.yaml`
     * You can add `-C` for a dry run to see what would happen without actually making any changes.
     * You can rerun this later if you make any config changes.
     * If you don't want to use the Kopia backups or want to set them up later, add `--skip-tags backup`
     * If you don't want to install the Newrelic agent, add `--skip-tags newrelic`
-7. Run the [one-time Mastodon bootstrapping setup](https://docs.joinmastodon.org/admin/setup/)
+8. Run the [one-time Mastodon bootstrapping setup](https://docs.joinmastodon.org/admin/setup/)
     * From the root directory (/mnt/mastodon by default): `docker-compose run -e RAILS_ENV=production setup bundle exec rake
       mastodon:setup`. This should output some environment variables. You'll find the missing secrets here. Copy their values into
       `group_vars/mastodon/vault.yaml` (use `ansible-vault edit vault.yaml` to edit and re-encrypt).

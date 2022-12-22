@@ -94,6 +94,19 @@
         repo: "https://github.com/mastodon/mastodon.git"
         dest: "{{ root }}/mastodon"
         version: "{{ mastodon_version }}"
+        force: true  # Clears any patches applied below
+    - name: Check for patch file
+      delegate_to: localhost
+      stat:
+        path: "roles/mastodon/files/mastodon.patch"
+      register: p
+    - name: Apply patch
+      when: p.stat.exists and p.stat.readable
+      patch:
+        src: "mastodon.patch"
+        basedir: "{{ root }}/mastodon"
+        strip: 1
+
     - name: Mastodon files directory
       file:
         path: "{{ root }}/files"
