@@ -108,6 +108,8 @@ services:
     restart: always
     env_file: .env.production
     command: "bundle exec sidekiq -c {{ sidekiq_threads }}"
+    environment:
+      DB_POOL: "{{ sidekiq_threads }}"
     depends_on:
       - db
       - redis
