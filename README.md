@@ -146,6 +146,11 @@ https://one.newrelic.com/ . Then you can set up alerts there to be notified if y
       reset password function later to recover the password.
     * Re-run the playbook from the previous step (with any `--skip-tags` you need) to reconfigure and restart Mastodon.
     * You should now be able to log in and start using Mastodon!
+9. (Optional) To connect your new instance to the wider Fediverse and make discovery easier, you may want to connect to one of the relay 
+   servers from [this list](https://joinfediverse.wiki/index.php?title=Fediverse_relays). Go to Settings > Administration > Relays.
+    * Note that some relays require your server to be up for a couple of weeks before they approve your join request.
+    * Also make sure to do some research on the relay owners (by checking relay members and its top-level domain), as some may be run by 
+      communities/organizations you may find objectionable.
 
 ## Troubleshooting
 
