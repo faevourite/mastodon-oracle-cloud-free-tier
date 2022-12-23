@@ -15,10 +15,12 @@ root: /mnt/mastodon
 # Your handle will be @<name>@<local_domain>
 local_domain: glyphy.com
 
-# Instance "name" (what you enter in clients) and how you access the Web UI
+# Instance "name" (what you enter in web/app clients) and how you access the Web UI
 web_domain: social.glyphy.com
 
 single_user_mode: "true"
+
+sidekiq_threads: 15
 
 smtp_server: smtp.sendgrid.net
 smtp_port: 587

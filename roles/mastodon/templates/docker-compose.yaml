@@ -107,7 +107,7 @@ services:
     image: "tootsuite/mastodon:{{ mastodon_version }}"
     restart: always
     env_file: .env.production
-    command: bundle exec sidekiq
+    command: "bundle exec sidekiq -c {{ sidekiq_threads }}"
     depends_on:
       - db
       - redis
