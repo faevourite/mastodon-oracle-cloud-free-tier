@@ -124,5 +124,6 @@
         dest: "{{ root }}/docker-compose.yaml"
 
     - name: Start the mastodon stack
+      tags: start
       community.docker.docker_compose:
         project_src: "{{ root }}"

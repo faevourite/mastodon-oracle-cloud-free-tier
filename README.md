@@ -152,6 +152,54 @@ https://one.newrelic.com/ . Then you can set up alerts there to be notified if y
     * Also make sure to do some research on the relay owners (by checking relay members and its top-level domain), as some may be run by 
       communities/organizations you may find objectionable.
 
+## Upgrading
+
+### 4.0.2 to 4.1.0
+
+4.1.0 switched to using Docker Buildkit, which doesn't seem to be supported in Ansible yet, so Mastodon images need to be built manually 
+for now.
+
+1. SSH into the remote host and `cd` into your mastodon directory (`/mnt/mastodon` by default).
+2. Set dockerd to use buildkit by default.
+    ```shell
+    # On local
+    ansible-playbook mastodon.yaml --tags docker
+    # On remote
+    sudo service docker restart
+    ```
+3.  ```shell
+    # Stop Mastodon containers, but leave Postgres running
+    # On remote
+    docker-compose stop web sidekiq streaming
+    ```
+4.  ```shell
+    # Run a backup if you have it set up
+    # On remote
+    /mnt/mastodon/backup.sh
+    ```
+5. Update `mastodon_version` in `group_vars/mastodon/vars.yaml` to 4.1.0
+6.  ```shell
+    # Update docker-compose.yaml remotely without starting containers.
+    # This may fail to apply your custom patches if they've diverged from upstream.
+    # Just fix them up and rerun the command.
+    # On local
+    ansible-playbook mastodon.yaml --tags mastodon --skip-tags start
+    ```
+7.  ```shell
+    # Build the new image manually. This step is necessary as of 4.1.0 due to the switch to using docker buildkit.
+    # On remote
+    DOCKER_BUILDKIT=1 docker build -t tootsuite/mastodon:v4.1.0 mastodon 
+    
+    # Run the DB migration.
+    # On remote
+    docker-compose run --rm web rails db:migrate
+    ```
+8. Start Mastodon containers
+    ```shell
+    # On local
+    ansible-playbook mastodon.yaml --tags mastodon
+    ```
+
 ## Troubleshooting
 
 ### Can't access web domain

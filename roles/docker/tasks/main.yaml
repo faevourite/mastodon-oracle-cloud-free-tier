@@ -20,6 +20,12 @@
     append: yes
     groups: docker
 
+- name: Enable docker buildkit
+  become: yes
+  template:
+    src: daemon.json
+    dest: '/etc/docker/daemon.json'
+
 - name: Docker service
   become: yes
   ansible.builtin.service:
