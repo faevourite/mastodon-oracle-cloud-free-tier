@@ -16,7 +16,7 @@ echo "Creating Postgres dump..."
 ionice -c idle nice docker-compose exec -T db pg_dumpall -h db -U postgres -w > backup/mastodon.sql
 
 echo "Done creating Postgres dump"
-echo "Starting Kopia backup of the Posgres dump and Mastodon files/"
+echo "Starting Kopia backup of the Postgres dump and Mastodon files/"
 
 cd kopia
 
