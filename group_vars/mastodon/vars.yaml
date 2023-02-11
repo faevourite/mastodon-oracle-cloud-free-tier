@@ -69,3 +69,8 @@ health_checks_io_url: "{{ vault_health_checks_io_url }}"
 # Newrelic license key
 # Can leave empty
 newrelic_license_key: "{{ vault_newrelic_license_key }}"
+
+# DeepL translation. Leave empty if you don't want it.
+# Otherwise, sign up for a free plan and get your key from https://www.deepl.com/account/summary .
+# See https://write.as/sweetmeat/how-to-activate-the-mastodon-v4-deepl-api-text-translation-service
+deepl_api_key: "{{ vault_deepl_api_key }}"
