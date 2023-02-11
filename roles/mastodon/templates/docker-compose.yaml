@@ -9,7 +9,7 @@ x-logging: &default-logging
 
 services:
   caddy:
-    restart: always
+    restart: unless-stopped
     build: ./caddy
     image: "caddy:{{ caddy_version }}"
     networks:
@@ -24,7 +24,7 @@ services:
     logging: *default-logging
 
   db:
-    restart: always
+    restart: unless-stopped
     image: postgres:14-alpine
     shm_size: 512mb
     networks:
@@ -38,7 +38,7 @@ services:
     logging: *default-logging
 
   redis:
-    restart: always
+    restart: unless-stopped
     image: redis:7-alpine
     networks:
       - internal_network
@@ -69,7 +69,7 @@ services:
   web:
     build: ./mastodon
     image: "tootsuite/mastodon:{{ mastodon_version }}"
-    restart: always
+    restart: unless-stopped
     env_file: .env.production
     command: bash -c "rm -f /mastodon/tmp/pids/server.pid; bundle exec rails s -p 3000"
     networks:
@@ -88,7 +88,7 @@ services:
   streaming:
     build: ./mastodon
     image: "tootsuite/mastodon:{{ mastodon_version }}"
-    restart: always
+    restart: unless-stopped
     env_file: .env.production
     command: node ./streaming
     networks:
@@ -105,7 +105,7 @@ services:
   sidekiq:
     build: ./mastodon
     image: "tootsuite/mastodon:{{ mastodon_version }}"
-    restart: always
+    restart: unless-stopped
     env_file: .env.production
     command: "bundle exec sidekiq -c {{ sidekiq_threads }}"
     environment:
