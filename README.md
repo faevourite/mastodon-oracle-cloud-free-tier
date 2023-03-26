@@ -154,7 +154,7 @@ https://one.newrelic.com/ . Then you can set up alerts there to be notified if y
 
 ## Upgrading
 
-### 4.0.2 to 4.1.0
+### 4.1.0 and beyond
 
 4.1.0 switched to using Docker Buildkit, which doesn't seem to be supported in Ansible yet, so Mastodon images need to be built manually 
 for now.
@@ -177,7 +177,7 @@ for now.
     # On remote
     /mnt/mastodon/backup.sh
     ```
-5. Update `mastodon_version` in `group_vars/mastodon/vars.yaml` to 4.1.0
+5. Update `mastodon_version` in `group_vars/mastodon/vars.yaml` to the new version, like `4.1.1`
 6.  ```shell
     # Update docker-compose.yaml remotely without starting containers.
     # This may fail to apply your custom patches if they've diverged from upstream.
@@ -188,7 +188,7 @@ for now.
 7.  ```shell
     # Build the new image manually. This step is necessary as of 4.1.0 due to the switch to using docker buildkit.
     # On remote
-    DOCKER_BUILDKIT=1 docker build -t tootsuite/mastodon:v4.1.0 mastodon 
+    docker-compose build web 
     
     # Run the DB migration.
     # On remote
