@@ -6,9 +6,9 @@ sshguard_config_items:
 - allowlist
 sshguard_config_path: /etc/sshguard
 # Full path to backend executable
-sshguard_backend: /usr/lib/x86_64-linux-gnu/sshg-fw-nft-sets
+sshguard_backend: /usr/libexec/sshguard/sshg-fw-nft-sets
 # Shell command that provides logs on standard output. Example: ssh and sendmail from systemd journal:
-sshguard_logreader: "LANG=C /bin/journalctl -afb -p info -n1 -o cat SYSLOG_FACILITY=4 SYSLOG_FACILITY=10"
+sshguard_logreader: "LANG=C journalctl -afb -p info -n1 -t sshd -o cat"
 sshguard_whitelist:
 - comment: IPv4 localhost
   address: 127.0.0.0/8
