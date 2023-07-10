@@ -26,6 +26,11 @@
   header @cache_control Cache-Control "public, max-age=31536000, immutable"
 
   reverse_proxy web:3000
-
   reverse_proxy /api/v1/streaming/* streaming:4000
+
+  handle /system/* {
+    header X-Content-Type-Options "nosniff"
+    header Content-Security-Policy "default-src 'none'; form-action 'none'"
+    reverse_proxy web:3000
+  }
 }
