@@ -9,3 +9,12 @@ group_vars/*/vault*
 terraform.tfstate*
 terraform.tfvars
 .auto.tfvars
+
+# Kopia repo config
+roles/mastodon/templates/kopia-repository.config
+
+# Rclone config
+roles/mastodon/templates/rclone.conf
+
+# Mastodon upstream patch
+roles/mastodon/files/mastodon.patch
