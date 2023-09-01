@@ -13,7 +13,9 @@
 
   encode zstd gzip
   log {
-    output file /logs/{{ web_domain }}.log
+    output file /logs/{{ web_domain }}.log {
+      roll_keep 5
+    }
   }
 
   root * /html/mastodon
