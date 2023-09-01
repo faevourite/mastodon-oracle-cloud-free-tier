@@ -48,12 +48,16 @@
 
 ### CADDY
 - name: Caddy
+  become: true
   tags: caddy
   block:
     - name: Caddy top directory
       file:
         path: "{{ root }}/caddy"
         state: directory
+        recurse: true
+        owner: "{{ ansible_user_uid }}"
+        group: "{{ ansible_user_gid }}"
     - name: Caddy config directory
       file:
         path: "{{ root }}/caddy/config"

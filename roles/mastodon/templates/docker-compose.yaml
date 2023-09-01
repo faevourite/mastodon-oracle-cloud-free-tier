@@ -21,6 +21,7 @@ services:
       - ./caddy/config:/config
       - ./caddy/data:/data
       - ./mastodon/public:/html/mastodon
+    user: "{{ ansible_user_uid }}:{{ ansible_user_gid }}"
     logging: *default-logging
 
   db:
