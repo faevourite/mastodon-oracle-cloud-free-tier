@@ -55,9 +55,6 @@
       file:
         path: "{{ root }}/caddy"
         state: directory
-        recurse: true
-        owner: "{{ ansible_user_uid }}"
-        group: "{{ ansible_user_gid }}"
     - name: Caddy config directory
       file:
         path: "{{ root }}/caddy/config"
@@ -65,6 +62,10 @@
     - name: Caddy data directory
       file:
         path: "{{ root }}/caddy/data"
+        state: directory
+    - name: Caddy logs directory
+      file:
+        path: "{{ root }}/caddy/logs"
         state: directory
     - name: Caddyfile
       template:
@@ -74,6 +75,13 @@
       template:
         src: CaddyDockerfile
         dest: "{{ root }}/caddy/Dockerfile"
+    - name: Recursively chown Caddy top directory
+      file:
+        path: "{{ root }}/caddy"
+        state: directory
+        recurse: true
+        owner: "{{ ansible_user_uid }}"
+        group: "{{ ansible_user_gid }}"
 
 ### POSTGRES
 - name: Postgres directory

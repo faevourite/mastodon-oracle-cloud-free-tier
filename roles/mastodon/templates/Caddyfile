@@ -12,6 +12,9 @@
   }
 
   encode zstd gzip
+  log {
+    output file /logs/{{ web_domain }}.log
+  }
 
   root * /html/mastodon
   file_server
