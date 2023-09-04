@@ -152,6 +152,48 @@ https://one.newrelic.com/ . Then you can set up alerts there to be notified if y
     * Also make sure to do some research on the relay owners (by checking relay members and its top-level domain), as some may be run by 
       communities/organizations you may find objectionable.
 
+## Next Steps: Discovery
+
+Being on a solo instance can be quite lonely. Mastodon's design [makes it hard for single-user instances to discover what's going on in the
+Fediverse]
+(https://jvns.ca/blog/2023/08/11/some-notes-on-mastodon/#downsides-to-being-on-a-single-person-server). Additionally, unless you're 
+following some very active accounts, your instance's CPU usage may be so low that Oracle may deem it unused and try to delete it. 
+They'll email you to give you a heads-up, but (fortunately?) improving discovery also adds CPU load.
+
+**Warning: adding relays will likely greatly increase the amount of storage your instance requires. See the Tuning section below.**
+
+### FediBuzz relay
+
+You can subscribe to hashtags using [the excellent FediBuzz relay](https://relay.fedi.buzz/). This is different from just following a 
+hashtag via Mastodon UI. The latter just filters the posts your server already knows about, while the former tells your server about 
+posts it may have never seen.
+
+This relay relies on being able to consume an instance's public posts anonymously, which is prone to abuse, so starting with Mastodon 4.2 
+this functionality requires an API token. If you like this tool and want to support its effectiveness, you can
+[donate an API token](https://fedi.buzz/token/donate). This essentially lets FediBuzz see the posts your server sees and then broadcast 
+them out to other servers that subscribe to the relay. Because this also allows FediBuzz to see your DMs, you can create a separate user 
+on your instance. The following creates a "fedibuzz" user on your instance:
+
+1. From `/mnt/mastodon`, `docker-compose exec web bash`
+2. `tootctl accounts create fedibuzz --email another_email@example.com` (password will be auto-generated)
+3. Either log out or open the confirmation link in the email in a private browser window, update password and set up 2FA (optional)
+4. I didn't get an approval email, so I ran `tootctl accounts modify fedibuzz --approve` to approve the account.
+5. Then just paste your instance domain on https://fedi.buzz/token/donate
+
+### Open relays
+
+If you just want an unfiltered firehose of posts from other instances, there are some public relays out there:
+
+1. https://relaylist.com/
+2. https://joinfediverse.wiki/index.php?title=Fediverse_relays
+
+## Next Steps: Tuning
+
+If you added some relays (see previous section) your instance will start having to store a lot more posts, including the images included 
+within them. This can quickly burn through the free tier storage. I recommend going to `Settings > Administration > Server Settings > 
+Content retention` and setting "Media cache retention period" to something short like 3 days. If you view a post with some media on day 
+4 your Mastodon client will just fetch the missing media from the origin server on the fly.
+
 ## Upgrading
 
 ### 4.1.0 and beyond
