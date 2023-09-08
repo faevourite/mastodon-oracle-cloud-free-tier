@@ -196,51 +196,13 @@ Content retention` and setting "Media cache retention period" to something short
 
 ## Upgrading
 
-### 4.1.0 and beyond
+Generally, the upgrade process is:
 
-4.1.0 switched to using Docker Buildkit, which doesn't seem to be supported in Ansible yet, so Mastodon images need to be built manually 
-for now.
+1. On the remote host, run a backup if you have configured them: `/mnt/mastodon/backup.sh`
+2. Back on your local machine, set `mastodon_version` in `group_vars/mastodon/vars.yaml`
+3. Run `ansible-playbook mastodon.yaml`
 
-1. SSH into the remote host and `cd` into your mastodon directory (`/mnt/mastodon` by default).
-2. Set dockerd to use buildkit by default.
-    ```shell
-    # On local
-    ansible-playbook mastodon.yaml --tags docker
-    # On remote
-    sudo service docker restart
-    ```
-3.  ```shell
-    # Stop Mastodon containers, but leave Postgres running
-    # On remote
-    docker-compose stop web sidekiq streaming
-    ```
-4.  ```shell
-    # Run a backup if you have it set up
-    # On remote
-    /mnt/mastodon/backup.sh
-    ```
-5. Update `mastodon_version` in `group_vars/mastodon/vars.yaml` to the new version, like `4.1.1`
-6.  ```shell
-    # Update docker-compose.yaml remotely without starting containers.
-    # This may fail to apply your custom patches if they've diverged from upstream.
-    # Just fix them up and rerun the command.
-    # On local
-    ansible-playbook mastodon.yaml --tags mastodon --skip-tags start
-    ```
-7.  ```shell
-    # Build the new image manually. This step is necessary as of 4.1.0 due to the switch to using docker buildkit.
-    # On remote
-    docker-compose build web 
-    
-    # Run the DB migration.
-    # On remote
-    docker-compose run --rm web rails db:migrate
-    ```
-8. Start Mastodon containers
-    ```shell
-    # On local
-    ansible-playbook mastodon.yaml --tags mastodon
-    ```
+The playbook will build the new image, run the migration scripts, and restart Mastodon services.
 
 ## Troubleshooting
 

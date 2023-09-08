@@ -135,7 +135,31 @@
         src: docker-compose.yaml
         dest: "{{ root }}/docker-compose.yaml"
 
+    - name: Check if mastodon docker image is already built
+      community.docker.docker_image_info:
+        name: "tootsuite/mastodon:{{ mastodon_version }}"
+      register: masto_image
+
+    # Ansible's docker module doesn't yet support buildkit, so have to use a shell command
+    - name: Build image with buildx
+      when: masto_image.images | length == 0
+      shell:
+        chdir: "{{ root }}"
+        cmd: |
+          docker-compose build web
+
+    - name: Run pre-deployment DB migrations
+      shell:
+        chdir: "{{ root }}"
+        cmd: |
+          docker-compose run --rm -e SKIP_POST_DEPLOYMENT_MIGRATIONS=true web bundle exec rails db:migrate
+
     - name: Start the mastodon stack
-      tags: start
       community.docker.docker_compose:
         project_src: "{{ root }}"
+
+    - name: Run post-deployment DB migrations
+      shell:
+        chdir: "{{ root }}"
+        cmd: |
+          docker-compose run --rm web bundle exec rails db:migrate
