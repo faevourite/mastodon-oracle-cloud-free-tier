@@ -12,6 +12,7 @@
     path: /lib/systemd/system/docker.service
     insertafter: "^After="
     line: 'After=tailscaled.service'
+  register: post_tailscale
 
 - name: Put user in docker group
   become: yes
@@ -19,18 +20,21 @@
     user: "{{ansible_user_id}}"
     append: yes
     groups: docker
+  register: docker_user
 
 - name: Enable docker buildkit
   become: yes
   template:
     src: daemon.json
     dest: '/etc/docker/daemon.json'
+  register: buildkit
 
 - name: Docker service
   become: yes
   ansible.builtin.service:
     name: docker
-    state: started
+    state: restarted
+  when: post_tailscale.changed or docker_user.changed or buildkit.changed
 
 - name: Cron docker prune
   ansible.builtin.cron:
