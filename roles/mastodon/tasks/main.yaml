@@ -97,6 +97,21 @@
     path: "{{ root }}/redis"
     state: directory
 
+### ELASTICSEARCH
+- name: Elasticsearch directory
+  tags: es
+  file:
+    path: "{{ root }}/elasticsearch"
+    state: directory
+    mode: '777'
+# https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html#_set_vm_max_map_count_to_at_least_262144
+- name: Elasticsearch's vm.max_map_count sysctl req
+  tags: es
+  become: yes
+  sysctl:
+    name: vm.max_map_count
+    value: '262144'
+
 ### MASTODON
 - name: Mastodon
   tags: mastodon
@@ -149,6 +164,7 @@
           docker-compose build web
 
     - name: Run pre-deployment DB migrations
+      tags: migrations
       shell:
         chdir: "{{ root }}"
         cmd: |
@@ -159,7 +175,20 @@
         project_src: "{{ root }}"
 
     - name: Run post-deployment DB migrations
+      tags: migrations
       shell:
         chdir: "{{ root }}"
         cmd: |
           docker-compose run --rm web bundle exec rails db:migrate
+
+    - name: Deploy and reindex Elasticsearch
+      tags: [ es, migrations ]
+      shell:
+        chdir: "{{ root }}"
+        cmd: |
+          docker-compose run --rm web tootctl search deploy --reset-chewy
+      # A couple of reties, since the elasticsearch container can take a little while to start
+      register: esresult
+      until: esresult is not failed
+      retries: 2
+      delay: 5

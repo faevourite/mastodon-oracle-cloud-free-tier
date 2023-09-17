@@ -1,8 +1,11 @@
 # Mastodon on Oracle Cloud's always free tier with Terraform and Ansible
 
+This sets up a single node instance, which should be large enough for most users. Elasticsearch is included, so you can search your toots,
+favourites, bookmarks, and (since 4.2) any public posts from users who opted in.
+
 Based loosely on https://github.com/xmflsct/oracle-arm-mastodon and https://github.com/mastodon/mastodon/blob/main/docker-compose.yml .
 
-This is how I set up my [@dv@glyphy.com account](https://social.glyphy.com/@dv).
+This is how I set up my [personal account](https://social.glyphy.com/@dv).
 
 [Here's an alternate Ansible playbook](https://github.com/l3ib/mastodon-ansible) that doesn't use Docker.
 
@@ -146,8 +149,8 @@ https://one.newrelic.com/ . Then you can set up alerts there to be notified if y
       reset password function later to recover the password.
     * Re-run the playbook from the previous step (with any `--skip-tags` you need) to reconfigure and restart Mastodon.
     * You should now be able to log in and start using Mastodon!
-9. (Optional) To connect your new instance to the wider Fediverse and make discovery easier, you may want to connect to one of the relay 
-   servers from [this list](https://joinfediverse.wiki/index.php?title=Fediverse_relays). Go to Settings > Administration > Relays.
+9. (Optional) To connect your new instance to the wider Fediverse and make discovery easier, you may want to add one of the relays 
+   from [this list](https://joinfediverse.wiki/index.php?title=Fediverse_relays). Go to Settings > Administration > Relays.
     * Note that some relays require your server to be up for a couple of weeks before they approve your join request.
     * Also make sure to do some research on the relay owners (by checking relay members and its top-level domain), as some may be run by 
       communities/organizations you may find objectionable.
@@ -202,7 +205,10 @@ Generally, the upgrade process is:
 2. Back on your local machine, set `mastodon_version` in `group_vars/mastodon/vars.yaml`
 3. Run `ansible-playbook mastodon.yaml`
 
-The playbook will build the new image, run the migration scripts, and restart Mastodon services.
+The playbook will build the new image, run the migration scripts, rebuild the search index, and restart Mastodon services.
+
+If you want to speed up the process and you're sure all the versions between your current and the one you're upgrading to don't 
+require migrations you can skip them with `ansible-playbook mastodon.yaml --skip-tags=migrations` . 
 
 ## Troubleshooting
 
