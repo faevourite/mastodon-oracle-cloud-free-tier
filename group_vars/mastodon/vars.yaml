@@ -1,6 +1,6 @@
 ---
 ### VERSIONS
-mastodon_version: v4.2.0
+mastodon_version: v4.2.1
 caddy_version: 2.7-alpine
 caddy_builder_version: 2.7-builder-alpine
 kopia_version: 0.12.1
