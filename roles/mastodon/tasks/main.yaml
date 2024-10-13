@@ -122,6 +122,7 @@
         dest: "{{ root }}/mastodon"
         version: "{{ mastodon_version }}"
         force: true  # Clears any patches applied below
+
     - name: Check for patch file
       delegate_to: localhost
       stat:
@@ -150,18 +151,59 @@
         src: docker-compose.yaml
         dest: "{{ root }}/docker-compose.yaml"
 
-    - name: Check if mastodon docker image is already built
+    # Build images
+    - name: Check if the mastodon web docker image is already built
       community.docker.docker_image_info:
-        name: "tootsuite/mastodon:{{ mastodon_version }}"
-      register: masto_image
+        name: "ghcr.io/mastodon/mastodon:{{ mastodon_version }}"
+      register: masto_web_image
+    - name: Check if the mastodon streaming docker image is already built
+      community.docker.docker_image_info:
+        name: "ghcr.io/mastodon/mastodon-streaming:{{ mastodon_version }}"
+      register: masto_streaming_image
 
-    # Ansible's docker module doesn't yet support buildkit, so have to use a shell command
-    - name: Build image with buildx
-      when: masto_image.images | length == 0
+    # Ansible's docker module didn't support buildkit until recently. Use a shell command for now.
+    - name: Build web image
+      when: masto_web_image.images | length == 0 or force_image_rebuild
       shell:
         chdir: "{{ root }}"
         cmd: |
           docker-compose build web
+    - name: Build streaming image
+      when: masto_streaming_image.images | length == 0 or force_image_rebuild
+      shell:
+        chdir: "{{ root }}"
+        cmd: |
+          docker-compose build streaming
+
+    # New in 4.3.0: DB encryption env variables
+    - name: Check db encryption envars
+      register: envars_check
+      failed_when: "envars_check.rc >= 2"
+      shell:
+        chdir: "{{ root }}"
+        cmd: |
+          grep -q -e 'ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY=\W*\w' .env.production
+    - name: Generate db encryption envars
+      when: envars_check.rc != 0
+      register: db_encrypt_envars
+      shell:
+        chdir: "{{ root }}"
+        cmd: "docker-compose run --rm web bin/rails db:encryption:init | grep ACTIVE_RECORD"
+    - name: Print db encryption envars
+      when: envars_check.rc != 0 and db_encrypt_envars.rc == 0
+      debug:
+        msg: |
+          Run `ansible-vault edit group_vars/mastodon/vault.yaml` and paste the following at the bottom:
+
+          vault_ar_enc_deterministic_key: "{{ db_encrypt_envars.stdout | regex_search('ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY=(.*)', '\1') | first }}"
+          vault_ar_enc_key_derivation_salt: "{{ db_encrypt_envars.stdout | regex_search('ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT=(.*)', '\1') | first }}"
+          vault_ar_enc_primary_key: "{{ db_encrypt_envars.stdout | regex_search('ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY=(.*)', '\1') | first }}"
+
+          Save, exit the editor, and rerun the ansible-playbook command.
+    - name: Stop if envars need setting
+      when: envars_check.rc != 0 and db_encrypt_envars.rc == 0
+      fail:
+        msg: "See instructions above; rerun once done"
 
     - name: Run pre-deployment DB migrations
       tags: migrations
@@ -171,7 +213,7 @@
           docker-compose run --rm -e SKIP_POST_DEPLOYMENT_MIGRATIONS=true web bundle exec rails db:migrate
 
     - name: Start the mastodon stack
-      community.docker.docker_compose:
+      community.docker.docker_compose_v2:
         project_src: "{{ root }}"
 
     - name: Run post-deployment DB migrations

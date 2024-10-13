@@ -55,7 +55,7 @@ services:
   # Can probably also just run web and then `docker-compose exec` into it to run the setup step
   #  setup:
   #    build: ./mastodon
-  #    image: tootsuite/mastodon
+  #    image: "ghcr.io/mastodon/mastodon:{{ mastodon_version }}"
   #    command: "bundle exec rake mastodon:setup"
   #    environment:
   #      RAILS_ENV: production
@@ -101,35 +101,40 @@ services:
 
   web:
     build: ./mastodon
-    image: "tootsuite/mastodon:{{ mastodon_version }}"
+    image: "ghcr.io/mastodon/mastodon:{{ mastodon_version }}"
     restart: unless-stopped
     env_file: .env.production
-    command: bash -c "rm -f /mastodon/tmp/pids/server.pid; bundle exec rails s -p 3000"
+    command: bundle exec puma -C config/puma.rb
     networks:
       - external_network
       - internal_network
     healthcheck:
       # prettier-ignore
-      test: [ 'CMD-SHELL', 'wget -q --spider --proxy=off localhost:3000/health || exit 1' ]
+      test: [ 'CMD-SHELL',"curl -s --noproxy localhost localhost:3000/health | grep -q 'OK' || exit 1" ]
     depends_on:
       - db
       - redis
+      - es
     volumes:
       - ./files:/mastodon/public/system
     logging: *default-logging
 
   streaming:
-    build: ./mastodon
-    image: "tootsuite/mastodon:{{ mastodon_version }}"
+    build:
+      dockerfile: ./streaming/Dockerfile
+      context: ./mastodon
+    image: "ghcr.io/mastodon/mastodon-streaming:{{ mastodon_version }}"
     restart: unless-stopped
     env_file: .env.production
-    command: node ./streaming
+    command: node ./streaming/index.js
     networks:
       - external_network
       - internal_network
     healthcheck:
       # prettier-ignore
-      test: [ 'CMD-SHELL', 'wget -q --spider --proxy=off localhost:4000/api/v1/streaming/health || exit 1' ]
+      test: [ 'CMD-SHELL', "curl -s --noproxy localhost localhost:4000/api/v1/streaming/health | grep -q 'OK' || exit 1" ]
+    ports:
+      - '127.0.0.1:4000:4000'
     depends_on:
       - db
       - redis
@@ -137,7 +142,7 @@ services:
 
   sidekiq:
     build: ./mastodon
-    image: "tootsuite/mastodon:{{ mastodon_version }}"
+    image: "ghcr.io/mastodon/mastodon:{{ mastodon_version }}"
     restart: unless-stopped
     env_file: .env.production
     command: "bundle exec sidekiq -c {{ sidekiq_threads }}"

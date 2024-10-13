@@ -5,6 +5,8 @@
     name:
     - docker.io
     - docker-compose
+    - docker-compose-v2
+    - docker-buildx
 
 - name: Configure the docker service to start after tailscale
   become: yes

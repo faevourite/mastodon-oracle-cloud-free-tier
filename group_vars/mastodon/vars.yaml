@@ -1,6 +1,10 @@
 ---
 ### VERSIONS
-mastodon_version: v4.2.1
+mastodon_version: v4.3.0
+
+# Set to true if you made changes to the patch file but the version above is the same
+force_image_rebuild: false
+
 caddy_version: 2.7-alpine
 caddy_builder_version: 2.7-builder-alpine
 kopia_version: 0.12.1
@@ -43,10 +47,13 @@ cloudflare_token: "{{ vault_cloudflare_token }}"
 
 # Mastodon secrets
 # See README.md . These are generated via tootctl once Mastodon is running.
-otp_secret: "{{ vault_otp_secret }}"
-secret_key_base: "{{ vault_secret_key_base }}"
-vapid_priv_key: "{{ vault_vapid_priv_key }}"
-vapid_pub_key: "{{ vault_vapid_pub_key }}"
+otp_secret: "{{ vault_otp_secret | default('') }}"
+secret_key_base: "{{ vault_secret_key_base | default('') }}"
+vapid_priv_key: "{{ vault_vapid_priv_key | default('') }}"
+vapid_pub_key: "{{ vault_vapid_pub_key | default('') }}"
+ar_enc_deterministic_key: "{{ vault_ar_enc_deterministic_key | default('') }}"
+ar_enc_key_derivation_salt: "{{ vault_ar_enc_key_derivation_salt | default('') }}"
+ar_enc_primary_key: "{{ vault_ar_enc_primary_key | default('') }}"
 
 # Mastodon SMTP password
 # Depends on your email provider. See other smtp_ variables above too.

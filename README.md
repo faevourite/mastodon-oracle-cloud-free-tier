@@ -53,18 +53,18 @@ You can skip this to get Mastodon running and set it up later. It won't impact h
    # If, like me, you used rclone, replace <rclone-repo-name> with the name from rclone.conf
    # Adjust the rclone-args path as needed, or remove if you didn't need rclone
    kopia repository connect rclone --remote-path=<rclone-repo-name>:/kopia --rclone-args="--config=roles/mastodon/templates/rclone.conf"
-   
+
    # Enable compression
    kopia policy set global --compression pgzip
-   
+
    # Disable compression for common media files
-   kopia policy set --global --add-never-compress=.jpg --add-never-compress=.jpeg --add-never-compress=.JPG --add-never-compress=.JPEG 
-   --add-never-compress=.png --add-never-compress=.PNG --add-never-compress=.mov --add-never-compress=.MOV --add-never-compress=.mp4 
-   --add-never-compress=.MP4 --add-never-compress=.avi --add-never-compress=.AVI --add-never-compress=.JPEG --add-never-compress=.png 
-   --add-never-compress=.PNG --add-never-compress=.mov --add-never-compress=.MOV --add-never-compress=.mp4 --add-never-compress=.MP4 
-   --add-never-compress=.avi --add-never-compress=.AVI --add-never-compress=.JPEG --add-never-compress=.png --add-never-compress=.PNG 
-   --add-never-compress=.mov --add-never-compress=.MOV --add-never-compress=.mp4 --add-never-compress=.MP4 --add-never-compress=.avi 
-   --add-never-compress=.AVI --add-never-compress=.JPEG --add-never-compress=.png --add-never-compress=.PNG --add-never-compress=.mov 
+   kopia policy set --global --add-never-compress=.jpg --add-never-compress=.jpeg --add-never-compress=.JPG --add-never-compress=.JPEG
+   --add-never-compress=.png --add-never-compress=.PNG --add-never-compress=.mov --add-never-compress=.MOV --add-never-compress=.mp4
+   --add-never-compress=.MP4 --add-never-compress=.avi --add-never-compress=.AVI --add-never-compress=.JPEG --add-never-compress=.png
+   --add-never-compress=.PNG --add-never-compress=.mov --add-never-compress=.MOV --add-never-compress=.mp4 --add-never-compress=.MP4
+   --add-never-compress=.avi --add-never-compress=.AVI --add-never-compress=.JPEG --add-never-compress=.png --add-never-compress=.PNG
+   --add-never-compress=.mov --add-never-compress=.MOV --add-never-compress=.mp4 --add-never-compress=.MP4 --add-never-compress=.avi
+   --add-never-compress=.AVI --add-never-compress=.JPEG --add-never-compress=.png --add-never-compress=.PNG --add-never-compress=.mov
    --add-never-compress=.MOV --add-never-compress=.mp4 --add-never-compress=.MP4 --add-never-compress=.avi --add-never-compress=.AVI
    ```
 
@@ -113,7 +113,9 @@ https://one.newrelic.com/ . Then you can set up alerts there to be notified if y
    the `root` variable location from `vars.yaml` above. This bootstrap process only needs to be done once.
 6. (Optional) Apply any upstream patches to modify Mastodon itself
    1. Clone [the mastodon repo](https://github.com/mastodon/mastodon)
-   2. Make changes to the source code as needed. For example, [extend the default timeline length](https://github.com/mastodon/mastodon/issues/2301).
+   2. Make changes to the source code as needed. For example,
+      [extend the default timeline length](https://github.com/mastodon/mastodon/issues/2301) or
+      [increase the post size](https://write.as/sweetmeat/customize-mastodon-to-change-your-post-character-limit).
    3. Run `git diff` and save the output to `roles/mastodon/files/mastodon.patch`. This will get applied in the next step. Example patch:
       ```
       diff --git a/app/lib/feed_manager.rb b/app/lib/feed_manager.rb
@@ -122,17 +124,17 @@ https://one.newrelic.com/ . Then you can set up alerts there to be notified if y
       +++ b/app/lib/feed_manager.rb
       @@ -7,12 +7,12 @@ class FeedManager
          include Redisable
-       
+
          # Maximum number of items stored in a single feed
       -  MAX_ITEMS = 400
       +  MAX_ITEMS = 4000
-       
+
          # Number of items in the feed since last reblog of status
          # before the new reblog will be inserted. Must be <= MAX_ITEMS
          # or the tracking sets will grow forever
       -  REBLOG_FALLOFF = 40
       +  REBLOG_FALLOFF = 400
-       
+
          # Execute block for every active account
          # @yield [Account]
       ```
@@ -142,39 +144,39 @@ https://one.newrelic.com/ . Then you can set up alerts there to be notified if y
     * If you don't want to use the Kopia backups or want to set them up later, add `--skip-tags backup`
     * If you don't want to install the Newrelic agent, add `--skip-tags newrelic`
 8. Run the [one-time Mastodon bootstrapping setup](https://docs.joinmastodon.org/admin/setup/)
-    * From the root directory (/mnt/mastodon by default): `docker-compose run -e RAILS_ENV=production setup bundle exec rake
+    * From the root directory (/mnt/mastodon by default): `docker-compose run -e RAILS_ENV=production -- web setup bundle exec rake
       mastodon:setup`. This should output some environment variables. You'll find the missing secrets here. Copy their values into
       `group_vars/mastodon/vault.yaml` (use `ansible-vault edit vault.yaml` to edit and re-encrypt).
     * You should be able to also set up the admin user via this step. I got a cryptic error when I did this, but I was able to use the
       reset password function later to recover the password.
     * Re-run the playbook from the previous step (with any `--skip-tags` you need) to reconfigure and restart Mastodon.
     * You should now be able to log in and start using Mastodon!
-9. (Optional) To connect your new instance to the wider Fediverse and make discovery easier, you may want to add one of the relays 
+9. (Optional) To connect your new instance to the wider Fediverse and make discovery easier, you may want to add one of the relays
    from [this list](https://joinfediverse.wiki/index.php?title=Fediverse_relays). Go to Settings > Administration > Relays.
     * Note that some relays require your server to be up for a couple of weeks before they approve your join request.
-    * Also make sure to do some research on the relay owners (by checking relay members and its top-level domain), as some may be run by 
+    * Also make sure to do some research on the relay owners (by checking relay members and its top-level domain), as some may be run by
       communities/organizations you may find objectionable.
 
 ## Next Steps: Discovery
 
 Being on a solo instance can be quite lonely. Mastodon's design [makes it hard for single-user instances to discover what's going on in the
 Fediverse]
-(https://jvns.ca/blog/2023/08/11/some-notes-on-mastodon/#downsides-to-being-on-a-single-person-server). Additionally, unless you're 
-following some very active accounts, your instance's CPU usage may be so low that Oracle may deem it unused and try to delete it. 
+(https://jvns.ca/blog/2023/08/11/some-notes-on-mastodon/#downsides-to-being-on-a-single-person-server). Additionally, unless you're
+following some very active accounts, your instance's CPU usage may be so low that Oracle may deem it unused and try to delete it.
 They'll email you to give you a heads-up, but (fortunately?) improving discovery also adds CPU load.
 
 **Warning: adding relays will likely greatly increase the amount of storage your instance requires. See the Tuning section below.**
 
 ### FediBuzz relay
 
-You can subscribe to hashtags using [the excellent FediBuzz relay](https://relay.fedi.buzz/). This is different from just following a 
-hashtag via Mastodon UI. The latter just filters the posts your server already knows about, while the former tells your server about 
+You can subscribe to hashtags using [the excellent FediBuzz relay](https://relay.fedi.buzz/). This is different from just following a
+hashtag via Mastodon UI. The latter just filters the posts your server already knows about, while the former tells your server about
 posts it may have never seen.
 
-This relay relies on being able to consume an instance's public posts anonymously, which is prone to abuse, so starting with Mastodon 4.2 
+This relay relies on being able to consume an instance's public posts anonymously, which is prone to abuse, so starting with Mastodon 4.2
 this functionality requires an API token. If you like this tool and want to support its effectiveness, you can
-[donate an API token](https://fedi.buzz/token/donate). This essentially lets FediBuzz see the posts your server sees and then broadcast 
-them out to other servers that subscribe to the relay. Because this also allows FediBuzz to see your DMs, you can create a separate user 
+[donate an API token](https://fedi.buzz/token/donate). This essentially lets FediBuzz see the posts your server sees and then broadcast
+them out to other servers that subscribe to the relay. Because this also allows FediBuzz to see your DMs, you can create a separate user
 on your instance. The following creates a "fedibuzz" user on your instance:
 
 1. From `/mnt/mastodon`, `docker-compose exec web bash`
@@ -192,9 +194,9 @@ If you just want an unfiltered firehose of posts from other instances, there are
 
 ## Next Steps: Tuning
 
-If you added some relays (see previous section) your instance will start having to store a lot more posts, including the images included 
-within them. This can quickly burn through the free tier storage. I recommend going to `Settings > Administration > Server Settings > 
-Content retention` and setting "Media cache retention period" to something short like 3 days. If you view a post with some media on day 
+If you added some relays (see previous section) your instance will start having to store a lot more posts, including the images included
+within them. This can quickly burn through the free tier storage. I recommend going to `Settings > Administration > Server Settings >
+Content retention` and setting "Media cache retention period" to something short like 3 days. If you view a post with some media on day
 4 your Mastodon client will just fetch the missing media from the origin server on the fly.
 
 ## Upgrading
@@ -207,8 +209,8 @@ Generally, the upgrade process is:
 
 The playbook will build the new image, run the migration scripts, rebuild the search index, and restart Mastodon services.
 
-If you want to speed up the process and you're sure all the versions between your current and the one you're upgrading to don't 
-require migrations you can skip them with `ansible-playbook mastodon.yaml --skip-tags=migrations` . 
+If you want to speed up the process and you're sure all the versions between your current and the one you're upgrading to don't
+require migrations you can skip them with `ansible-playbook mastodon.yaml --skip-tags=migrations` .
 
 ## Troubleshooting
 
