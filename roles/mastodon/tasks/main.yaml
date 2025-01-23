@@ -151,29 +151,19 @@
         src: docker-compose.yaml
         dest: "{{ root }}/docker-compose.yaml"
 
-    # Build images
-    - name: Check if the mastodon web docker image is already built
-      community.docker.docker_image_info:
-        name: "ghcr.io/mastodon/mastodon:{{ mastodon_version }}"
-      register: masto_web_image
-    - name: Check if the mastodon streaming docker image is already built
-      community.docker.docker_image_info:
-        name: "ghcr.io/mastodon/mastodon-streaming:{{ mastodon_version }}"
-      register: masto_streaming_image
-
-    # Ansible's docker module didn't support buildkit until recently. Use a shell command for now.
     - name: Build web image
-      when: masto_web_image.images | length == 0 or force_image_rebuild
-      shell:
-        chdir: "{{ root }}"
-        cmd: |
-          docker-compose build web
+      community.docker.docker_image_build:
+        name: "ghcr.io/mastodon/mastodon:{{ mastodon_version }}"
+        path: "{{ root }}/mastodon"
+        pull: true
+        rebuild: "{{ force_image_rebuild | ternary('always', 'never') }}"
     - name: Build streaming image
-      when: masto_streaming_image.images | length == 0 or force_image_rebuild
-      shell:
-        chdir: "{{ root }}"
-        cmd: |
-          docker-compose build streaming
+      community.docker.docker_image_build:
+        name: "ghcr.io/mastodon/mastodon-streaming:{{ mastodon_version }}"
+        path: "{{ root }}/mastodon"
+        dockerfile: streaming/Dockerfile
+        pull: true
+        rebuild: "{{ force_image_rebuild | ternary('always', 'never') }}"
 
     # New in 4.3.0: DB encryption env variables
     - name: Check db encryption envars
@@ -234,3 +224,15 @@
       until: esresult is not failed
       retries: 2
       delay: 5
+
+    - name: Place cleanup script
+      template:
+        src: "cleanup.sh"
+        dest: "{{ root }}/cleanup.sh"
+        mode: '700'
+    - name: Schedule cleanup
+      cron:
+        name: Clean up temporary data to avoid running out of disk space
+        job: 'cron-runner {{ root }}/cleanup.sh'
+        hour: 6
+        minute: 30
