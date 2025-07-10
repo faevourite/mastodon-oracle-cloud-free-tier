@@ -3,18 +3,10 @@
   become: yes
   apt:
     name:
-    - docker.io
-    - docker-compose
-    - docker-compose-v2
-    - docker-buildx
-
-- name: Configure the docker service to start after tailscale
-  become: yes
-  ansible.builtin.lineinfile:
-    path: /lib/systemd/system/docker.service
-    insertafter: "^After="
-    line: 'After=tailscaled.service'
-  register: post_tailscale
+      - docker.io
+      - docker-compose
+      - docker-compose-v2
+      - docker-buildx
 
 - name: Put user in docker group
   become: yes
@@ -36,7 +28,7 @@
   ansible.builtin.service:
     name: docker
     state: restarted
-  when: post_tailscale.changed or docker_user.changed or buildkit.changed
+  when: docker_user.changed or buildkit.changed
 
 - name: Cron docker prune
   ansible.builtin.cron:
