@@ -16,7 +16,7 @@ This project automates the deployment of a Mastodon instance on Oracle Cloud's A
 
 - `terraform/`: Contains the Terraform configuration (`main.tf`) for creating the OCI resources.
 - `ansible.cfg`: Ansible configuration file.
-- `inventory.ini`: Ansible inventory file, which should be updated with the server's IP address after it's provisioned.
+- `inventory.ini.sample`: A sample Ansible inventory file. The real one is inventory.ini, but git-ignored.
 - `mastodon.yaml`: The main Ansible playbook for setting up the Mastodon instance.
 - `group_vars/mastodon/vars.yaml`: Ansible variables for configuring the Mastodon instance, including domain names, versions, and secrets.
 - `roles/`: Contains Ansible roles for different parts of the setup:
@@ -35,9 +35,17 @@ This project automates the deployment of a Mastodon instance on Oracle Cloud's A
 - `terraform/main.tf`: Defines the Oracle Cloud infrastructure.
 - `mastodon.yaml`: The main Ansible playbook that orchestrates the entire configuration process.
 - `group_vars/mastodon/vars.yaml`: The primary file for user-specific configuration. This is where the user will define their domain, Mastodon version, and other settings.
-- `roles/mastodon/templates/docker-compose.yaml.j2`: The Jinja2 template for the Docker Compose file that defines the Mastodon services.
-- `roles/mastodon/templates/Caddyfile.j2`: The Jinja2 template for the Caddy web server configuration.
+- `roles/mastodon/templates/docker-compose.yaml`: The template for the Docker Compose file that defines the Mastodon services.
+- `roles/mastodon/templates/Caddyfile`: The template for the Caddy web server configuration.
 - `roles/mastodon/tasks/main.yaml`: The main task file for the `mastodon` role, which contains the logic for setting up the Mastodon application.
+
+## Optional Features
+
+The project includes optional features that can be enabled by the user:
+
+- **Backups with Kopia:** The `mastodon` role includes tasks for setting up backups using Kopia. This is configured through variables in `group_vars/mastodon/vars.yaml` and the `roles/mastodon/templates/kopia.sh` and `roles/mastodon/templates/backup.sh` scripts.
+- **New Relic Monitoring:** The `newrelic` role can be used to install the New Relic agent for monitoring the server. This is configured through variables in `group_vars/mastodon/vars.yaml`.
+- **Pushover and Healthchecks.io:** The project supports sending notifications for cron job failures using Pushover and Healthchecks.io. These are configured through variables in `group_vars/mastodon/vars.yaml`.
 
 ## Deployment Workflow
 
