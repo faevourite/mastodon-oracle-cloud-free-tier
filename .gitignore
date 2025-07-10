@@ -13,6 +13,7 @@ group_vars/*/vault*
 terraform.tfstate*
 terraform.tfvars
 .auto.tfvars
+.terraform.lock.hcl
 
 # Kopia repo config
 roles/mastodon/templates/kopia-repository.config
