@@ -65,3 +65,7 @@ The project includes optional features that can be enabled by the user:
 ## Secrets Management
 
 The project uses Ansible Vault to manage secrets. The `group_vars/mastodon/vars.yaml` file references variables that are expected to be in a `vault.yaml` file in the same directory. The `README.md` provides instructions on how to set up and use Ansible Vault.
+
+## Development Guidelines
+
+- Every Ansible playbook change should be tested with the `-C` (check) option before deployment.
