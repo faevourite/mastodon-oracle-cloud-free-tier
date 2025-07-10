@@ -34,6 +34,16 @@
         src: "kopia-repository.config"
         dest: "{{ root }}/kopia/config/repository.config"
         mode: '600'
+    - name: Kopia script
+      template:
+        src: kopia.sh
+        dest: "{{ root }}/kopia/kopia.sh"
+        mode: '700'
+    - name: Kopia restore script
+      template:
+        src: restore.sh
+        dest: "{{ root }}/restore.sh"
+        mode: '700'
     - name: Backup script
       template:
         src: backup.sh
@@ -44,6 +54,17 @@
         name: Mastodon backup
         job: 'cron-runner {{ root }}/backup.sh'
         hour: 5
+        minute: 30
+    - name: Kopia maintenance script
+      template:
+        src: kopia-maintenance.sh
+        dest: "{{ root }}/kopia/kopia-maintenance.sh"
+        mode: '700'
+    - name: Cron kopia maintenance
+      cron:
+        name: Kopia maintenance
+        job: 'cron-runner {{ root }}/kopia/kopia-maintenance.sh'
+        hour: 3
         minute: 30
 
 ### CADDY
