@@ -34,5 +34,6 @@
   ansible.builtin.cron:
     name: "docker prune"
     job: 'cron-runner docker system prune -af'
+    weekday: "1"
     hour: "0"
     minute: "10"
