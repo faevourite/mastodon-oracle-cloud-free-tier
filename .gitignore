@@ -1,7 +1,11 @@
+# Env
 .direnv
+.envrc
+.env
 
 # Ansible
 .vault
+inventory.ini
 group_vars/*/vault*
 
 # Terraform
