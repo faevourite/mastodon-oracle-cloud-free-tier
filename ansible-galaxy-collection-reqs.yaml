@@ -1,0 +1,4 @@
+collections:
+  # https://github.com/ansible-collections/community.docker/releases
+  - name: community.docker
+    version: 4.6.1

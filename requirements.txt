@@ -1,0 +1,17 @@
+ansible==11.7.0
+ansible-core==2.18.6
+certifi==2024.7.4
+cffi==1.17.1
+circuitbreaker==1.4.0
+cryptography==44.0.1
+Jinja2==3.1.6
+MarkupSafe==2.1.1
+packaging==21.3
+pycparser==2.21
+pyOpenSSL==22.0.0
+pyparsing==3.0.9
+python-dateutil==2.8.2
+pytz==2022.6
+PyYAML==6.0.1
+resolvelib==0.8.1
+six==1.16.0

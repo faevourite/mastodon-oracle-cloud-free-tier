@@ -1,0 +1,3 @@
+# https://galaxy.ansible.com/ui/standalone/roles/newrelic/newrelic-infra/versions/
+- src: newrelic.newrelic-infra
+  version: 0.13.0
