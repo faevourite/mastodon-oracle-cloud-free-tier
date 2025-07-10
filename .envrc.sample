@@ -1,0 +1,11 @@
+layout python3
+export ANSIBLE_VAULT_PASSWORD_FILE=$(pwd)/.vault
+export ANSIBLE_INVENTORY=$(pwd)/inventory.ini
+
+# Needed on Mac OS
+export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
+
+# Uncomment to source .env as well
+# May need to enable a direnv option.
+# See https://direnv.net/man/direnv.toml.1.html#codeloaddotenvcode
+# dotenv
