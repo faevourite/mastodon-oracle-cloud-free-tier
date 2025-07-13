@@ -53,6 +53,10 @@ Kopia can back up to many destinations. [Its setup](https://kopia.io/docs/gettin
    --add-never-compress=.MOV --add-never-compress=.mp4 --add-never-compress=.MP4 --add-never-compress=.avi --add-never-compress=.AVI
    ```
 
+If you SSH into the remote host, you can run kopia commands via the script at `<root>/kopia/kopia.sh`. For example, `/mnt/mastodon/kopia/kopia.sh snapshot list` will list all the snapshots with their IDs.
+
+To restore from a backup, find the snapshot id and run `<root>/restore.sh <snapshot id> <target directory>`. For example, `/mnt/mastodon/restore.sh 1234asdf tmp` will restore into the `tmp` directory (create it first with `mkdir -p tmp`).
+
 ### [Optional] Step 1.3: Observability with [Newrelic](https://newrelic.com/)
 
 A free account with Newrelic will allow you to set up their agent on the instance, which will send metrics that you can see on https://one.newrelic.com/ . Then you can set up alerts there to be notified if you're running out of disk space and such.
