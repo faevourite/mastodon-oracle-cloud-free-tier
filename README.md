@@ -82,7 +82,7 @@ A free account with Newrelic will allow you to set up their agent on the instanc
 
 ## Step 3: Set up Mastodon
 
-1. Update `inventory.ini` and set the IP for the "oci" host to the one from the previous step.
+1. Copy `inventory.ini.sample` to `inventory.ini` and set the IP for the "oci" host to the one from the previous step.
 2. Configure Ansible variables in `group_vars/mastodon/vars.yaml`.
 3. If your `web_domain` is not the same as `local_domain`, you'll need to [set up a webfinger forward](https://docs.joinmastodon.org/admin/config/#web_domain) on the latter to point to the former.
     * I use an Apache-compatible web server on glyphy.com, so I added the following to my .htaccess:
