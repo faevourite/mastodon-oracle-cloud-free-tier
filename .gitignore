@@ -1,6 +1,5 @@
 # Env
 .direnv
-.envrc
 .env
 
 # Ansible
