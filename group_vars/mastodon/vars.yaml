@@ -7,7 +7,7 @@ force_image_rebuild: false
 
 caddy_version: 2.7-alpine
 caddy_builder_version: 2.7-builder-alpine
-kopia_version: 0.20.1
+kopia_version: 0.21.0
 
 
 ### MASTODON
