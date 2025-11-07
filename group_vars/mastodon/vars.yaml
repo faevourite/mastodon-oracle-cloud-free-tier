@@ -1,6 +1,6 @@
 ---
 ### VERSIONS
-mastodon_version: v4.4.8
+mastodon_version: v4.5.0
 
 # Set to true if you made changes to the patch file but the version above is the same
 force_image_rebuild: false
