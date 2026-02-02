@@ -5,8 +5,8 @@ mastodon_version: v4.5.5
 # Set to true if you made changes to the patch file but the version above is the same
 force_image_rebuild: false
 
-caddy_version: 2.7-alpine
-caddy_builder_version: 2.7-builder-alpine
+caddy_version: 2-alpine
+caddy_builder_version: 2-builder-alpine
 kopia_version: 0.21.1
 
 
