@@ -5,7 +5,7 @@ set -eou pipefail
 cd "{{ root }}"
 
 echo "starting statuses cleanup"
-docker-compose exec -T web tootctl statuses remove --days 90
+docker-compose exec -T web tootctl statuses remove --days 90 2> >(grep -v "ProgressBar::InvalidProgressError" >&2)
 
 echo "starting accounts cleanup"
 docker-compose exec -T web tootctl accounts prune
