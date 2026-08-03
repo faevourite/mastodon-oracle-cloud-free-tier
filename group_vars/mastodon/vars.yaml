@@ -1,6 +1,6 @@
 ---
 ### VERSIONS
-mastodon_version: v4.6.3
+mastodon_version: v4.6.4
 
 # Set to true if you made changes to the patch file but the version above is the same
 force_image_rebuild: false
@@ -73,9 +73,10 @@ pushover_user: "{{ vault_pushover_user }}"
 # Can leave empty
 health_checks_io_url: "{{ vault_health_checks_io_url }}"
 
-# Newrelic license key
+# Newrelic
 # Can leave empty
-newrelic_license_key: "{{ vault_newrelic_license_key }}"
+newrelic_api_key: "{{ vault_newrelic_api_key }}"
+newrelic_account_id: "{{ vault_newrelic_account_id }}"
 
 # DeepL translation. Leave empty if you don't want it.
 # Otherwise, sign up for a free plan and get your key from https://www.deepl.com/account/summary .

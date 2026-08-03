@@ -6,7 +6,7 @@
 
 - name: Add ~/bin to PATH
   ansible.builtin.lineinfile:
-    line: 'export PATH="/home/{{ ansible_user_id }}/bin:$PATH"'
+    line: "export PATH=\"/home/{{ ansible_facts['user_id'] }}/bin:$PATH\""
     path: ~/.bashrc
 
 - name: Add cronic

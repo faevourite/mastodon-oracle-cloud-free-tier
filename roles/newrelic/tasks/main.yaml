@@ -1,10 +1,13 @@
 ---
-- name: Setup newrelic # https://github.com/newrelic/infrastructure-agent-ansible
+- name: Set up New Relic infrastructure monitoring
   become: true
   import_role:
-    name: newrelic.newrelic-infra
+    name: newrelic.newrelic_install
   vars:
-    nrinfragent_config:
-      license_key: "{{ newrelic_license_key }}"
-      log_file: /var/log/nr-infra.log
-      log_to_stdout: false
+    targets:
+      - infrastructure
+  environment:
+    NEW_RELIC_API_KEY: "{{ newrelic_api_key }}"
+    NEW_RELIC_ACCOUNT_ID: "{{ newrelic_account_id }}"
+  when:
+    - newrelic_api_key | default('') | length > 0
