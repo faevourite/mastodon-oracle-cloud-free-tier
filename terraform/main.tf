@@ -41,9 +41,9 @@ variable "instance_image_ocid" {
 
 variable "instance_shape" { default = "VM.Standard.A1.Flex" }
 
-variable "instance_ocpus" { default = 4 }
+variable "instance_ocpus" { default = 2 }
 
-variable "instance_shape_config_memory_in_gbs" { default = 24 }
+variable "instance_shape_config_memory_in_gbs" { default = 12 }
 
 data "oci_identity_availability_domain" "ad" {
   compartment_id = var.tenancy_ocid
